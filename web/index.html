@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlantGuard Pro — Calculadora</title>
+<meta name="description" content="Estimación del valor bruto recuperable y del VAN de PlantGuard Pro por cliente. Uso interno, no es oferta ni garantía.">
+<style>
+  :root {
+    --bg: #f6f8f6; --card: #ffffff; --ink: #17231b; --muted: #5b6b60; --line: #dbe4dd;
+    --accent: #2f7d4f; --accent-soft: #e3f1e8; --neg: #b3402f; --warn-bg: #fff6e0; --warn-ink: #6b4d00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1511; --card: #161f19; --ink: #e5ede7; --muted: #9aaba0; --line: #2a362e;
+      --accent: #6cc28f; --accent-soft: #1d3326; --neg: #ef8a78; --warn-bg: #2e2612; --warn-ink: #f0d58a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.9rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 1.1rem; margin: 0 0 12px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .warn { background: var(--warn-bg); color: var(--warn-ink); border-radius: 10px; padding: 10px 14px; font-size: .92rem; margin-bottom: 24px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 20px; }
+  @media (max-width: 820px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  fieldset { border: 0; padding: 0; min-width: 0; margin: 0 0 18px; }
+  legend { font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 8px; }
+  label { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 130px); align-items: center; gap: 10px; font-size: .93rem; padding: 4px 0; }
+  input, select { width: 100%; min-width: 0; font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); text-align: right; }
+  select { text-align: left; }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .kpi { background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; }
+  .kpi b { display: block; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: .82rem; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; font-variant-numeric: tabular-nums; }
+  th, td { white-space: nowrap; padding: 7px 6px; border-bottom: 1px solid var(--line); text-align: right; }
+  th:first-child, td:first-child { text-align: left; white-space: normal; }
+  thead th { font-size: .8rem; color: var(--muted); font-weight: 600; }
+  .neg { color: var(--neg); }
+  .errors { color: var(--neg); font-size: .9rem; }
+  .note { color: var(--muted); font-size: .85rem; margin-top: 14px; }
+  .table-wrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+<main>
+  <h1>PlantGuard Pro</h1>
+  <p class="sub">Calculadora de valor recuperable y evaluación por cliente (modelo ROI v1.0)</p>
+  <div class="warn">Uso interno. Las cifras precargadas son <strong>hipótesis ilustrativas</strong> del paquete maestro v2.0, no datos de un cliente ni eficacias demostradas. No es una oferta ni una garantía de resultados.</div>
+
+  <div class="grid">
+    <form class="card" id="form" autocomplete="off">
+      <fieldset>
+        <legend>Producción del cliente</legend>
+        <label>Superficie cultivada (m²)<input name="area" type="number" min="0" step="any"></label>
+        <label>Rendimiento por ciclo (g/m²)<input name="rendimiento" type="number" min="0" step="any"></label>
+        <label>Rendimiento: bruto (antes de pérdidas) o neto (cosechado)<select name="base"><option value="bruto">bruto</option><option value="neto">neto</option></select></label>
+        <label>Ciclos por año<input name="ciclos" type="number" min="0" step="any"></label>
+        <label>Pérdida actual por variabilidad (%)<input name="perdida" data-pct type="number" min="0" max="99.9" step="any"></label>
+        <label>Precio neto realizable (CHF/g)<input name="precio" type="number" min="0" step="any"></label>
+        <label>Realización comercial (%)<input name="realizacion" data-pct type="number" min="0" max="100" step="any"></label>
+        <label>Margen de contribución incremental (%)<input name="margen" data-pct type="number" min="0" max="100" step="any"></label>
+      </fieldset>
+      <fieldset>
+        <legend>Costos PlantGuard</legend>
+        <label>Hardware e instalación (CHF, año 0)<input name="hardware" type="number" min="0" step="any"></label>
+        <label>Suscripción y mantenimiento (CHF/año)<input name="licencia" type="number" min="0" step="any"></label>
+      </fieldset>
+      <fieldset>
+        <legend>Finanzas</legend>
+        <label>Tasa de descuento (%)<input name="tasa" data-pct type="number" min="0" step="any"></label>
+        <label>Horizonte (años, 1–5)<input name="horizonte" type="number" min="1" max="5" step="1"></label>
+        <label>Impuesto sobre utilidades (%)<input name="impuesto" data-pct type="number" min="0" max="100" step="any"></label>
+      </fieldset>
+      <fieldset>
+        <legend>% de la pérdida actual que se evita</legend>
+        <label>Conservador<input name="ef_conservador" data-pct type="number" min="0" max="100" step="any"></label>
+        <label>Base<input name="ef_base" data-pct type="number" min="0" max="100" step="any"></label>
+        <label>Optimista<input name="ef_optimista" data-pct type="number" min="0" max="100" step="any"></label>
+      </fieldset>
+    </form>
+
+    <section class="card" aria-live="polite">
+      <h2>Resultados</h2>
+      <div id="errors" class="errors"></div>
+      <div class="kpis">
+        <div class="kpi"><span>Valor bruto de la pérdida actual</span><b id="k-perdida">—</b></div>
+        <div class="kpi"><span>Eficacia mínima para VAN = 0</span><b id="k-umbral">—</b></div>
+      </div>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Indicador</th><th>Conservador</th><th>Base</th><th>Optimista</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      </div>
+      <p class="note">«Valor bruto recuperable» no es ROI: el VAN y el ROI descuentan margen, OPEX, inversión y el valor del dinero en el tiempo. La eficacia se expresa como % de la pérdida actual que se evita, no como puntos porcentuales (PG-FIN-01).</p>
+    </section>
+  </div>
+</main>
+<script type="module">
+  import { DEFAULTS, modelo } from "./roi.js";
+
+  const form = document.getElementById("form");
+  const chf = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CHF", maximumFractionDigits: 0 });
+  const pct = new Intl.NumberFormat("es-CL", { style: "percent", maximumFractionDigits: 1 });
+  const fmtChf = (v) => `<span class="${v < 0 ? "neg" : ""}">${chf.format(v)}</span>`;
+  const fmtPct = (v) => v === null ? "n/c" : `<span class="${v < 0 ? "neg" : ""}">${pct.format(v)}</span>`;
+
+  const valores = {
+    ...DEFAULTS, hardware: DEFAULTS.hardware + DEFAULTS.instalacion,
+    licencia: DEFAULTS.licencia + DEFAULTS.mantenimiento,
+    ef_conservador: DEFAULTS.eficacias.conservador, ef_base: DEFAULTS.eficacias.base,
+    ef_optimista: DEFAULTS.eficacias.optimista,
+  };
+  for (const el of form.elements) {
+    if (!el.name) continue;
+    const v = valores[el.name];
+    el.value = el.dataset.pct !== undefined ? +(v * 100).toFixed(6) : v;
+  }
+
+  function leer() {
+    const p = { ...DEFAULTS, instalacion: 0, mantenimiento: 0, eficacias: {} };
+    for (const el of form.elements) {
+      if (!el.name) continue;
+      let v = el.tagName === "SELECT" ? el.value : (el.value === "" ? NaN : Number(el.value));
+      if (el.dataset.pct !== undefined) v = v / 100;
+      if (el.name.startsWith("ef_")) p.eficacias[el.name.slice(3)] = v;
+      else p[el.name] = v;
+    }
+    return p;
+  }
+
+  function render() {
+    const m = modelo(leer());
+    const tbody = document.getElementById("tbody");
+    document.getElementById("errors").textContent = m.errores.length ? "Revisar entradas: " + m.errores.join(" · ") : "";
+    if (m.errores.length) { tbody.innerHTML = ""; return; }
+    const e = ["conservador", "base", "optimista"].map((k) => m.escenarios[k]);
+    document.getElementById("k-perdida").textContent = chf.format(m.derivados.valorPerdida) + "/año";
+    document.getElementById("k-umbral").innerHTML = m.umbral === null ? "n/a"
+      : m.umbral > 1 ? "> 100 %" : m.umbral <= 0 ? "0 % (revisar)" : pct.format(m.umbral);
+    const fila = (label, f) => `<tr><td>${label}</td>${e.map((x) => `<td>${f(x)}</td>`).join("")}</tr>`;
+    tbody.innerHTML = [
+      fila("Pérdida que se evita", (x) => pct.format(x.eficacia)),
+      fila("Valor bruto recuperable/año", (x) => fmtChf(x.brutoRegimen)),
+      fila("VAN", (x) => fmtChf(x.van)),
+      fila("TIR", (x) => fmtPct(x.tir)),
+      fila("Payback (año)", (x) => x.payback ?? "No recupera"),
+      fila("ROI simple acumulado", (x) => fmtPct(x.roi)),
+    ].join("");
+  }
+
+  form.addEventListener("input", render);
+  render();
+</script>
+</body>
+</html>
