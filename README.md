@@ -1,6 +1,6 @@
 # PlantGuard Pro
 
-Repositorio de trabajo de PlantGuard Pro: la calculadora web, el modelo financiero por cliente y la base de conocimiento del expediente.
+Calculadora web de PlantGuard Pro, pensada para enlazarse o insertarse en otra página web. El repositorio guarda también el modelo financiero y la base de conocimiento de los que sale el cálculo.
 
 > **Estado: prefactibilidad condicionada.** Las cifras precargadas son *hipótesis ilustrativas*. No hay todavía evidencia (piloto, cotizaciones, precios reales) para un dictamen favorable de inversión. Ver acciones PG-FIN-01 a PG-FIN-08.
 
@@ -10,7 +10,7 @@ Repositorio de trabajo de PlantGuard Pro: la calculadora web, el modelo financie
 | --- | --- |
 | `web/index.html` | Calculadora web (se publica en Vercel). Muestra valor bruto recuperable, VAN, TIR, payback y ROI por escenario. |
 | `web/roi.js` | Motor de cálculo. Misma lógica que el modelo Excel. |
-| `web/roi.test.mjs` | Pruebas: verifican que el motor reproduce los valores de la hoja original. |
+| `tests/roi.test.mjs` | Pruebas: verifican que el motor reproduce los valores de la hoja original. |
 | `modelo/PlantGuard_Pro_Modelo_ROI_v1.0.xlsx` | Modelo ROI por cliente con fórmulas (Resultados, Entradas, Flujos, Sensibilidad, Guía de datos). |
 | `modelo/generar_modelo.py` | Regenera el .xlsx desde código. |
 | `docs/PlantGuard_Pro_Base_Conocimiento_v2.0.md` | Base maestra de conocimiento v2.0 (exportada de Google Drive, 14-11-2026). |
@@ -38,6 +38,31 @@ npm run modelo    # regenera el Excel (requiere python3 + openpyxl)
 ```
 
 Para ver la web en local, sirve la carpeta `web/` con cualquier servidor estático, por ejemplo `npx serve web`.
+
+## Enlazar la calculadora desde una página web
+
+Una vez publicada en Vercel tendrás una dirección como `https://plantgard.vercel.app` (la exacta la muestra Vercel).
+
+**Opción 1: enlace o botón.** Abre la calculadora como página completa:
+
+```html
+<a href="https://plantgard.vercel.app">Calcula cuánto podrías recuperar</a>
+```
+
+**Opción 2: insertada dentro de la página.** Dentro de un iframe la calculadora oculta su título y su fondo, y avisa su altura para que no aparezcan barras de desplazamiento:
+
+```html
+<iframe id="plantguard-calc" src="https://plantgard.vercel.app" title="Calculadora PlantGuard Pro"
+        style="width:100%;border:0;height:1100px" loading="lazy"></iframe>
+<script>
+  addEventListener("message", (e) => {
+    if (e.data && e.data.plantguard === "altura")
+      document.getElementById("plantguard-calc").style.height = e.data.altura + "px";
+  });
+</script>
+```
+
+Si el constructor de páginas (Wix, WordPress, etc.) no permite el `<script>`, basta con el `<iframe>`: se verá igual, con la altura fija indicada. Para ver el modo insertado sin iframe, agrega `?embed=1` a la dirección.
 
 ## Despliegue en Vercel
 

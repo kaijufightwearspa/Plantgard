@@ -3,8 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PlantGuard Pro — Calculadora</title>
-<meta name="description" content="Estimación del valor bruto recuperable y del VAN de PlantGuard Pro por cliente. Uso interno, no es oferta ni garantía.">
+<script>
+  try { if (window.self !== window.top || new URLSearchParams(location.search).has("embed")) document.documentElement.classList.add("embed"); }
+  catch (e) { document.documentElement.classList.add("embed"); }
+</script>
+<title>Calculadora PlantGuard Pro</title>
+<meta name="description" content="Estima cuánto valor podría recuperar tu cultivo con PlantGuard Pro: valor bruto recuperable, VAN, TIR y ROI por escenario.">
 <style>
   :root {
     --bg: #f6f8f6; --card: #ffffff; --ink: #17231b; --muted: #5b6b60; --line: #dbe4dd;
@@ -20,6 +24,10 @@
   body { margin: 0; background: var(--bg); color: var(--ink);
          font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   main { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+  /* Modo insertado (iframe o ?embed=1): sin título ni márgenes grandes, fondo transparente */
+  .embed body { background: transparent; }
+  .embed main { padding: 0; }
+  .embed .page-head { display: none; }
   h1 { font-size: 1.9rem; margin: 0 0 4px; letter-spacing: -0.01em; }
   h2 { font-size: 1.1rem; margin: 0 0 12px; }
   .sub { color: var(--muted); margin: 0 0 20px; }
@@ -49,14 +57,16 @@
 </head>
 <body>
 <main>
-  <h1>PlantGuard Pro</h1>
-  <p class="sub">Calculadora de valor recuperable y evaluación por cliente (modelo ROI v1.0)</p>
-  <div class="warn">Uso interno. Las cifras precargadas son <strong>hipótesis ilustrativas</strong> del paquete maestro v2.0, no datos de un cliente ni eficacias demostradas. No es una oferta ni una garantía de resultados.</div>
+  <header class="page-head">
+    <h1>Calculadora PlantGuard Pro</h1>
+    <p class="sub">Estima cuánto valor podría recuperar tu cultivo al reducir las pérdidas por variabilidad.</p>
+  </header>
+  <div class="warn">Los valores precargados son un <strong>ejemplo ilustrativo</strong>: reemplázalos por los datos de tu cultivo. El resultado es una estimación referencial, no una oferta ni una garantía de resultados.</div>
 
   <div class="grid">
     <form class="card" id="form" autocomplete="off">
       <fieldset>
-        <legend>Producción del cliente</legend>
+        <legend>Tu producción</legend>
         <label>Superficie cultivada (m²)<input name="area" type="number" min="0" step="any"></label>
         <label>Rendimiento por ciclo (g/m²)<input name="rendimiento" type="number" min="0" step="any"></label>
         <label>Rendimiento: bruto (antes de pérdidas) o neto (cosechado)<select name="base"><option value="bruto">bruto</option><option value="neto">neto</option></select></label>
@@ -98,7 +108,7 @@
         <tbody id="tbody"></tbody>
       </table>
       </div>
-      <p class="note">«Valor bruto recuperable» no es ROI: el VAN y el ROI descuentan margen, OPEX, inversión y el valor del dinero en el tiempo. La eficacia se expresa como % de la pérdida actual que se evita, no como puntos porcentuales (PG-FIN-01).</p>
+      <p class="note">«Valor bruto recuperable» no es ROI: el VAN y el ROI descuentan margen, OPEX, inversión y el valor del dinero en el tiempo. La eficacia se expresa como % de la pérdida actual que se evita, no como puntos porcentuales: evitar el 5 % de una pérdida del 10 % la deja en 9,5 %.</p>
     </section>
   </div>
 </main>
@@ -157,6 +167,13 @@
 
   form.addEventListener("input", render);
   render();
+
+  // Insertada en otra página: avisa su altura para que el iframe no tenga barra de desplazamiento.
+  if (document.documentElement.classList.contains("embed")) {
+    const avisar = () => parent.postMessage({ plantguard: "altura", altura: document.documentElement.scrollHeight }, "*");
+    new ResizeObserver(avisar).observe(document.body);
+    addEventListener("load", avisar);
+  }
 </script>
 </body>
 </html>

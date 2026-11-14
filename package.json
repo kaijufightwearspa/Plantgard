@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "echo 'Sitio estático: nada que compilar'",
-    "test": "node --test web/roi.test.mjs",
+    "test": "node --test tests/roi.test.mjs",
     "modelo": "python3 modelo/generar_modelo.py"
   }
 }

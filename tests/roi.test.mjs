@@ -1,7 +1,7 @@
-// node --test web/   — verifica el motor contra los valores de la hoja original (revisión 11)
+// npm test   — verifica el motor contra los valores de la hoja original (revisión 11)
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DEFAULTS, modelo, validar } from "./roi.js";
+import { DEFAULTS, modelo, validar } from "../web/roi.js";
 
 const close = (a, b, tol = 0.01) => assert.ok(Math.abs(a - b) < tol, `${a} ≠ ${b}`);
 
