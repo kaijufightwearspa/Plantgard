@@ -3,3 +3,4 @@ node_modules/
 __pycache__/
 ~$*.xlsx
 .DS_Store
+graphify-out/
