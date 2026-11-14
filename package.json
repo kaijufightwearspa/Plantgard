@@ -5,6 +5,7 @@
   "scripts": {
     "build": "echo 'Sitio estático: nada que compilar'",
     "test": "node --test tests/roi.test.mjs",
-    "modelo": "python3 modelo/generar_modelo.py"
+    "modelo": "python3 modelo/generar_modelo.py",
+    "smoke": "node tests/smoke.mjs"
   }
 }

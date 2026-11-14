@@ -2,135 +2,189 @@
 <html lang="es-CL">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>
   try { if (window.self !== window.top || new URLSearchParams(location.search).has("embed")) document.documentElement.classList.add("embed"); }
   catch (e) { document.documentElement.classList.add("embed"); }
 </script>
 <title>Calculadora PlantGuard Pro</title>
 <meta name="description" content="Estima cuánto valor podría recuperar tu cultivo con PlantGuard Pro: valor bruto recuperable, VAN, TIR y ROI por escenario.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232f7d4f'/%3E%3Cpath d='M16 25V13M16 17c0-5 4-8 9-8 0 5-4 8-9 8zM16 20c0-4-3-7-8-7 0 4 3 7 8 7z' stroke='%23fff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
 <style>
+  /* Layout: formulario a la izquierda, resultados fijos a la derecha; una columna en el celular */
   :root {
-    --bg: #f6f8f6; --card: #ffffff; --ink: #17231b; --muted: #5b6b60; --line: #dbe4dd;
-    --accent: #2f7d4f; --accent-soft: #e3f1e8; --neg: #b3402f; --warn-bg: #fff6e0; --warn-ink: #6b4d00;
+    --bg: #f4f7f4; --card: #ffffff; --ink: #17231b; --muted: #59695e; --line: #d9e3dc;
+    --accent: #2f7d4f; --accent-soft: #e2f0e7; --neg: #b3402f; --warn-bg: #fff5dc; --warn-ink: #6b4d00;
+    --field: #f6f9f7;
+    --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-head: "Space Grotesk", "Inter", system-ui, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #0f1511; --card: #161f19; --ink: #e5ede7; --muted: #9aaba0; --line: #2a362e;
-      --accent: #6cc28f; --accent-soft: #1d3326; --neg: #ef8a78; --warn-bg: #2e2612; --warn-ink: #f0d58a;
+      --accent: #6cc28f; --accent-soft: #1c3325; --neg: #ef8a78; --warn-bg: #2e2612; --warn-ink: #f0d58a;
+      --field: #111a14; color-scheme: dark;
     }
   }
+  :root[data-theme="dark"] {
+    --bg: #0f1511; --card: #161f19; --ink: #e5ede7; --muted: #9aaba0; --line: #2a362e;
+    --accent: #6cc28f; --accent-soft: #1c3325; --neg: #ef8a78; --warn-bg: #2e2612; --warn-ink: #f0d58a;
+    --field: #111a14; color-scheme: dark;
+  }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink);
-         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
-  /* Modo insertado (iframe o ?embed=1): sin título ni márgenes grandes, fondo transparente */
-  .embed body { background: transparent; }
-  .embed main { padding: 0; }
-  .embed .page-head { display: none; }
-  h1 { font-size: 1.9rem; margin: 0 0 4px; letter-spacing: -0.01em; }
-  h2 { font-size: 1.1rem; margin: 0 0 12px; }
-  .sub { color: var(--muted); margin: 0 0 20px; }
-  .warn { background: var(--warn-bg); color: var(--warn-ink); border-radius: 10px; padding: 10px 14px; font-size: .92rem; margin-bottom: 24px; }
-  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 20px; }
-  @media (max-width: 820px) { .grid { grid-template-columns: minmax(0, 1fr); } }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
-  fieldset { border: 0; padding: 0; min-width: 0; margin: 0 0 18px; }
-  legend { font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 8px; }
-  label { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 130px); align-items: center; gap: 10px; font-size: .93rem; padding: 4px 0; }
-  input, select { width: 100%; min-width: 0; font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); text-align: right; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); }
+  main {
+    max-width: 1080px; margin: 0 auto; padding-block: 28px 56px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid; gap: 18px;
+  }
+  h1 { font: 600 1.85rem/1.15 var(--font-head); margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+  h2 { font: 600 1.1rem/1.2 var(--font-head); margin: 0; }
+  .sub { color: var(--muted); margin: 6px 0 0; max-width: 65ch; }
+  .warn { background: var(--warn-bg); color: var(--warn-ink); border-radius: 10px; padding: 10px 14px; font-size: .9rem; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 18px; align-items: start; }
+  @media (max-width: 840px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; min-width: 0; }
+  .results { display: grid; gap: 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+  @media (max-width: 840px) { .results { position: static; } }
+  form { display: grid; gap: 18px; }
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 2px; }
+  legend { font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 6px; }
+  .field { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 120px); align-items: center; gap: 10px; font-size: .92rem; padding: 3px 0; }
+  .field small { display: block; color: var(--muted); font-size: .78rem; }
+  input, select { width: 100%; min-width: 0; font: inherit; font-variant-numeric: tabular-nums; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--field); color: var(--ink); text-align: right; }
   select { text-align: left; }
-  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
-  .kpi { background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; }
-  .kpi b { display: block; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
-  .kpi span { font-size: .82rem; color: var(--muted); }
-  table { width: 100%; border-collapse: collapse; font-size: .92rem; font-variant-numeric: tabular-nums; }
-  th, td { white-space: nowrap; padding: 7px 6px; border-bottom: 1px solid var(--line); text-align: right; }
-  th:first-child, td:first-child { text-align: left; white-space: normal; }
-  thead th { font-size: .8rem; color: var(--muted); font-weight: 600; }
-  .neg { color: var(--neg); }
-  .errors { color: var(--neg); font-size: .9rem; }
-  .note { color: var(--muted); font-size: .85rem; margin-top: 14px; }
+  input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  input[aria-invalid="true"] { border-color: var(--neg); }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  button { font: 500 .88rem var(--font-body); padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .kpi { background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; display: grid; gap: 2px; }
+  .kpi b { font: 600 1.35rem/1.2 var(--font-head); font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: .8rem; color: var(--muted); }
+  .verdict { font-size: .88rem; color: var(--muted); }
   .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+  th, td { padding: 7px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; white-space: normal; }
+  thead th { font-size: .76rem; color: var(--muted); font-weight: 600; }
+  tr.total td { font-weight: 600; }
+  .neg { color: var(--neg); }
+  .errors { color: var(--neg); font-size: .88rem; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--card); }
+  .note { color: var(--muted); font-size: .82rem; margin: 0; }
+  .head-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+  /* Modo insertado (iframe o ?embed=1): sin título ni fondo propio */
+  .embed body { background: transparent; }
+  .embed main { padding-block: 0; }
+  .embed .page-head { display: none; }
+  .embed .results { position: static; }
+  @media (max-width: 420px) { .kpis { grid-template-columns: minmax(0, 1fr); } }
 </style>
 </head>
 <body>
 <main>
   <header class="page-head">
     <h1>Calculadora PlantGuard Pro</h1>
-    <p class="sub">Estima cuánto valor podría recuperar tu cultivo al reducir las pérdidas por variabilidad.</p>
+    <p class="sub">Estima cuánto valor podría recuperar un cultivo al reducir las pérdidas por variabilidad, y si la inversión se paga en el horizonte elegido.</p>
   </header>
-  <div class="warn">Los valores precargados son un <strong>ejemplo ilustrativo</strong>: reemplázalos por los datos de tu cultivo. El resultado es una estimación referencial, no una oferta ni una garantía de resultados.</div>
+  <div class="warn">Los valores precargados son un <strong>ejemplo ilustrativo</strong>: cámbialos para probar. El resultado es una estimación referencial, no una oferta ni una garantía de resultados.</div>
 
   <div class="grid">
-    <form class="card" id="form" autocomplete="off">
+    <form class="card" id="form" autocomplete="off" novalidate>
       <fieldset>
-        <legend>Tu producción</legend>
-        <label>Superficie cultivada (m²)<input name="area" type="number" min="0" step="any"></label>
-        <label>Rendimiento por ciclo (g/m²)<input name="rendimiento" type="number" min="0" step="any"></label>
-        <label>Rendimiento: bruto (antes de pérdidas) o neto (cosechado)<select name="base"><option value="bruto">bruto</option><option value="neto">neto</option></select></label>
-        <label>Ciclos por año<input name="ciclos" type="number" min="0" step="any"></label>
-        <label>Pérdida actual por variabilidad (%)<input name="perdida" data-pct type="number" min="0" max="99.9" step="any"></label>
-        <label>Precio neto realizable (CHF/g)<input name="precio" type="number" min="0" step="any"></label>
-        <label>Realización comercial (%)<input name="realizacion" data-pct type="number" min="0" max="100" step="any"></label>
-        <label>Margen de contribución incremental (%)<input name="margen" data-pct type="number" min="0" max="100" step="any"></label>
+        <legend>Producción</legend>
+        <label class="field" for="area">Superficie cultivada (m²)<input id="area" name="area" type="number" min="0" step="any"></label>
+        <label class="field" for="rendimiento">Rendimiento por ciclo (g/m²)<input id="rendimiento" name="rendimiento" type="number" min="0" step="any"></label>
+        <label class="field" for="base"><span>Tipo de rendimiento<small>Bruto: antes de pérdidas. Neto: lo cosechado.</small></span><select id="base" name="base"><option value="bruto">bruto</option><option value="neto">neto</option></select></label>
+        <label class="field" for="ciclos">Ciclos por año<input id="ciclos" name="ciclos" type="number" min="0" step="any"></label>
+        <label class="field" for="perdida">Pérdida actual por variabilidad (%)<input id="perdida" name="perdida" data-pct type="number" min="0" max="99.9" step="any"></label>
+        <label class="field" for="precio">Precio neto realizable (CHF/g)<input id="precio" name="precio" type="number" min="0" step="any"></label>
+        <label class="field" for="realizacion">Realización comercial (%)<input id="realizacion" name="realizacion" data-pct type="number" min="0" max="100" step="any"></label>
+        <label class="field" for="margen">Margen de contribución incremental (%)<input id="margen" name="margen" data-pct type="number" min="0" max="100" step="any"></label>
       </fieldset>
       <fieldset>
         <legend>Costos PlantGuard</legend>
-        <label>Hardware e instalación (CHF, año 0)<input name="hardware" type="number" min="0" step="any"></label>
-        <label>Suscripción y mantenimiento (CHF/año)<input name="licencia" type="number" min="0" step="any"></label>
+        <label class="field" for="hardware">Hardware e instalación (CHF, año 0)<input id="hardware" name="hardware" type="number" min="0" step="any"></label>
+        <label class="field" for="licencia">Suscripción y mantenimiento (CHF/año)<input id="licencia" name="licencia" type="number" min="0" step="any"></label>
       </fieldset>
       <fieldset>
         <legend>Finanzas</legend>
-        <label>Tasa de descuento (%)<input name="tasa" data-pct type="number" min="0" step="any"></label>
-        <label>Horizonte (años, 1–5)<input name="horizonte" type="number" min="1" max="5" step="1"></label>
-        <label>Impuesto sobre utilidades (%)<input name="impuesto" data-pct type="number" min="0" max="100" step="any"></label>
+        <label class="field" for="tasa">Tasa de descuento (%)<input id="tasa" name="tasa" data-pct type="number" min="0" step="any"></label>
+        <label class="field" for="horizonte">Horizonte (años, 1–5)<input id="horizonte" name="horizonte" type="number" min="1" max="5" step="1"></label>
+        <label class="field" for="impuesto">Impuesto sobre utilidades (%)<input id="impuesto" name="impuesto" data-pct type="number" min="0" max="100" step="any"></label>
       </fieldset>
       <fieldset>
         <legend>% de la pérdida actual que se evita</legend>
-        <label>Conservador<input name="ef_conservador" data-pct type="number" min="0" max="100" step="any"></label>
-        <label>Base<input name="ef_base" data-pct type="number" min="0" max="100" step="any"></label>
-        <label>Optimista<input name="ef_optimista" data-pct type="number" min="0" max="100" step="any"></label>
+        <label class="field" for="ef_conservador">Conservador<input id="ef_conservador" name="ef_conservador" data-pct type="number" min="0" max="100" step="any"></label>
+        <label class="field" for="ef_base">Base<input id="ef_base" name="ef_base" data-pct type="number" min="0" max="100" step="any"></label>
+        <label class="field" for="ef_optimista">Optimista<input id="ef_optimista" name="ef_optimista" data-pct type="number" min="0" max="100" step="any"></label>
       </fieldset>
+      <div class="actions"><button type="button" id="reset">Volver al ejemplo</button></div>
     </form>
 
-    <section class="card" aria-live="polite">
-      <h2>Resultados</h2>
-      <div id="errors" class="errors"></div>
-      <div class="kpis">
-        <div class="kpi"><span>Valor bruto de la pérdida actual</span><b id="k-perdida">—</b></div>
-        <div class="kpi"><span>Eficacia mínima para VAN = 0</span><b id="k-umbral">—</b></div>
-      </div>
-      <div class="table-wrap">
-      <table>
-        <thead><tr><th>Indicador</th><th>Conservador</th><th>Base</th><th>Optimista</th></tr></thead>
-        <tbody id="tbody"></tbody>
-      </table>
-      </div>
-      <p class="note">«Valor bruto recuperable» no es ROI: el VAN y el ROI descuentan margen, OPEX, inversión y el valor del dinero en el tiempo. La eficacia se expresa como % de la pérdida actual que se evita, no como puntos porcentuales: evitar el 5 % de una pérdida del 10 % la deja en 9,5 %.</p>
-    </section>
+    <div class="results">
+      <section class="card" aria-live="polite" style="display:grid;gap:14px">
+        <h2>Resultados</h2>
+        <div id="errors" class="errors" hidden></div>
+        <div class="kpis">
+          <div class="kpi"><span>Valor bruto de la pérdida actual</span><b id="k-perdida">—</b></div>
+          <div class="kpi"><span>Eficacia mínima para VAN = 0</span><b id="k-umbral">—</b></div>
+        </div>
+        <p class="verdict" id="verdict"></p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Indicador</th><th>Conservador</th><th>Base</th><th>Optimista</th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card" style="display:grid;gap:12px">
+        <div class="head-row">
+          <h2>Flujo de caja por año</h2>
+          <div class="tabs" role="group" aria-label="Escenario">
+            <button type="button" data-esc="conservador" aria-pressed="false">Conservador</button>
+            <button type="button" data-esc="base" aria-pressed="true">Base</button>
+            <button type="button" data-esc="optimista" aria-pressed="false">Optimista</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table id="flujos"></table></div>
+        <p class="note">«Valor bruto recuperable» no es ROI: el VAN y el ROI descuentan margen, OPEX, inversión y el valor del dinero en el tiempo. La eficacia es el % de la pérdida actual que se evita: evitar el 5 % de una pérdida del 10 % la deja en 9,5 %.</p>
+      </section>
+    </div>
   </div>
 </main>
-<script type="module">
-  import { DEFAULTS, modelo } from "./roi.js";
 
+<script type="module">
+import { DEFAULTS, modelo } from "./roi.js";
+
+{
   const form = document.getElementById("form");
   const chf = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CHF", maximumFractionDigits: 0 });
+  const num = new Intl.NumberFormat("es-CL", { maximumFractionDigits: 0 });
   const pct = new Intl.NumberFormat("es-CL", { style: "percent", maximumFractionDigits: 1 });
-  const fmtChf = (v) => `<span class="${v < 0 ? "neg" : ""}">${chf.format(v)}</span>`;
-  const fmtPct = (v) => v === null ? "n/c" : `<span class="${v < 0 ? "neg" : ""}">${pct.format(v)}</span>`;
+  const cls = (v) => (v < 0 ? "neg" : "");
+  const fmtChf = (v) => `<span class="${cls(v)}">${chf.format(v)}</span>`;
+  const fmtNum = (v) => `<span class="${cls(v)}">${num.format(v)}</span>`;
+  const fmtPct = (v) => (v === null ? "n/c" : `<span class="${cls(v)}">${pct.format(v)}</span>`);
+  let elegido = "base";
 
-  const valores = {
-    ...DEFAULTS, hardware: DEFAULTS.hardware + DEFAULTS.instalacion,
-    licencia: DEFAULTS.licencia + DEFAULTS.mantenimiento,
-    ef_conservador: DEFAULTS.eficacias.conservador, ef_base: DEFAULTS.eficacias.base,
-    ef_optimista: DEFAULTS.eficacias.optimista,
-  };
-  for (const el of form.elements) {
-    if (!el.name) continue;
-    const v = valores[el.name];
-    el.value = el.dataset.pct !== undefined ? +(v * 100).toFixed(6) : v;
+  function cargarEjemplo() {
+    const v = {
+      ...DEFAULTS, hardware: DEFAULTS.hardware + DEFAULTS.instalacion,
+      licencia: DEFAULTS.licencia + DEFAULTS.mantenimiento,
+      ef_conservador: DEFAULTS.eficacias.conservador, ef_base: DEFAULTS.eficacias.base,
+      ef_optimista: DEFAULTS.eficacias.optimista,
+    };
+    for (const el of form.elements) {
+      if (!el.name) continue;
+      el.value = el.dataset.pct !== undefined ? +(v[el.name] * 100).toFixed(6) : v[el.name];
+    }
   }
 
   function leer() {
@@ -146,16 +200,29 @@
   }
 
   function render() {
-    const m = modelo(leer());
-    const tbody = document.getElementById("tbody");
-    document.getElementById("errors").textContent = m.errores.length ? "Revisar entradas: " + m.errores.join(" · ") : "";
-    if (m.errores.length) { tbody.innerHTML = ""; return; }
-    const e = ["conservador", "base", "optimista"].map((k) => m.escenarios[k]);
+    const p = leer();
+    const m = modelo(p);
+    const err = document.getElementById("errors");
+    for (const el of form.elements) if (el.tagName === "INPUT") el.setAttribute("aria-invalid", String(m.errores.some((e) => e.startsWith(el.name.replace("ef_", "eficacia ")))));
+    err.hidden = !m.errores.length;
+    err.textContent = m.errores.length ? "Revisa estos datos: " + m.errores.join(" · ") : "";
+    if (m.errores.length) {
+      document.getElementById("tbody").innerHTML = "";
+      document.getElementById("flujos").innerHTML = "";
+      document.getElementById("verdict").textContent = "";
+      return;
+    }
+    const keys = ["conservador", "base", "optimista"];
+    const e = keys.map((k) => m.escenarios[k]);
     document.getElementById("k-perdida").textContent = chf.format(m.derivados.valorPerdida) + "/año";
     document.getElementById("k-umbral").innerHTML = m.umbral === null ? "n/a"
-      : m.umbral > 1 ? "> 100 %" : m.umbral <= 0 ? "0 % (revisar)" : pct.format(m.umbral);
+      : m.umbral > 1 ? "Más de 100 %" : m.umbral <= 0 ? "0 %" : pct.format(m.umbral);
+    document.getElementById("verdict").textContent = m.umbral === null ? ""
+      : m.umbral > 1 ? "Ni evitando toda la pérdida se recupera la inversión en este horizonte."
+      : m.umbral <= 0 ? "El VAN es positivo incluso sin eficacia: revisa los datos."
+      : `PlantGuard tendría que evitar al menos el ${pct.format(m.umbral)} de la pérdida actual para que la inversión cree valor.`;
     const fila = (label, f) => `<tr><td>${label}</td>${e.map((x) => `<td>${f(x)}</td>`).join("")}</tr>`;
-    tbody.innerHTML = [
+    document.getElementById("tbody").innerHTML = [
       fila("Pérdida que se evita", (x) => pct.format(x.eficacia)),
       fila("Valor bruto recuperable/año", (x) => fmtChf(x.brutoRegimen)),
       fila("VAN", (x) => fmtChf(x.van)),
@@ -163,9 +230,32 @@
       fila("Payback (año)", (x) => x.payback ?? "No recupera"),
       fila("ROI simple acumulado", (x) => fmtPct(x.roi)),
     ].join("");
+
+    const s = m.escenarios[elegido];
+    const anios = s.filas.filter((f) => f.n <= p.horizonte);
+    const row = (label, get, total) => `<tr${total ? ' class="total"' : ""}><td>${label}</td>${anios.map((f) => `<td>${get(f) == null ? "—" : fmtNum(get(f))}</td>`).join("")}</tr>`;
+    let acum = 0;
+    const acumulado = anios.map((f) => (acum += f.flujo));
+    document.getElementById("flujos").innerHTML =
+      `<thead><tr><th>CHF</th>${anios.map((f) => `<th>Año ${f.n}</th>`).join("")}</tr></thead><tbody>` +
+      row("Producción recuperada (g)", (f) => f.gramos) +
+      row("Valor bruto recuperado", (f) => f.bruto) +
+      row("Contribución incremental", (f) => f.contribucion) +
+      row("OPEX PlantGuard", (f) => f.opex) +
+      row("Flujo de caja neto", (f) => f.flujo, true) +
+      row("Flujo acumulado", (f) => acumulado[f.n]) +
+      row("Flujo descontado", (f) => f.descontado) +
+      `</tbody>`;
   }
 
+  document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => {
+    elegido = b.dataset.esc;
+    document.querySelectorAll(".tabs button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    render();
+  }));
+  document.getElementById("reset").addEventListener("click", () => { cargarEjemplo(); render(); });
   form.addEventListener("input", render);
+  cargarEjemplo();
   render();
 
   // Insertada en otra página: avisa su altura para que el iframe no tenga barra de desplazamiento.
@@ -174,6 +264,7 @@
     new ResizeObserver(avisar).observe(document.body);
     addEventListener("load", avisar);
   }
+}
 </script>
 </body>
 </html>

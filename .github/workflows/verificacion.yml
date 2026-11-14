@@ -1,0 +1,51 @@
+name: Verificación
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 11 * * *"   # todos los días, 08:17 en Chile
+
+jobs:
+  codigo:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Motor de cálculo (paridad con la hoja y el Excel)
+        run: npm test
+      - name: Excel coincide con el generador
+        run: |
+          pip install openpyxl==3.1.5
+          python tests/check_modelo.py
+      - name: Navegador (escritorio, celular, modo insertado)
+        run: |
+          npm install --no-save playwright@1.49.1
+          npx playwright install --with-deps chromium
+          npm run smoke
+
+  web-publicada:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Esperar a que Vercel publique el último cambio
+        if: github.event_name == 'push'
+        run: sleep 150
+      - name: Probar https://plantgard-kh23.vercel.app
+        run: |
+          npm install --no-save playwright@1.49.1
+          npx playwright install --with-deps chromium
+          node tests/smoke.mjs https://plantgard-kh23.vercel.app
